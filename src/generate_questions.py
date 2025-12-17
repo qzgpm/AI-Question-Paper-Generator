@@ -6,7 +6,7 @@ from syllabus_data import SYLLABUS
 from prompt_template import build_prompt
 
 # Load API key
-with open("../apikey.txt") as f:
+with open("apikey.txt") as f:
     api_key = f.read().strip()
 
 client = OpenAI(api_key=api_key)

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+
 SYLLABUS = {
     "Module 3": {
-        "name": "Trees and Graph Algorithms",
+        "name": "Implementation and Testing",
         "topics": [
-            "Trees and their properties",
-            "Pendant vertex",
-            "Spanning trees",
-            "Prim's algorithm",
-            "Kruskal's algorithm",
-            "Dijkstra's shortest path algorithm",
-            "Floyd-Warshall algorithm"
+            "Design patterns",
+            "Open-source licensing (GPL, LGPL, BSD)",
+            "Software testing strategies",
+            "White box testing",
+            "Black box testing",
+            "Test-driven development",
+            "DevOps practices",
+            "Continuous Integration and Deployment"
         ]
     }
 }

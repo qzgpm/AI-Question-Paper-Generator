@@ -2,25 +2,23 @@
 
 COURSE_OUTCOMES = {
     "CO1": {
-        "description": "Explain basic concepts of graphs",
-        "bloom": "Understand",
-        "topics": [
-            "walk, path and circuit",
-            "types of path"
-            "types of graphs",
-            "types of tree"
-            "properties of graphs and tree"
-            "degree of a vertex"
-        ]
+        "description": "Demonstrate Traditional and Agile Software Development approaches",
+        "bloom": "Apply"
+    },
+    "CO2": {
+        "description": "Prepare Software Requirement Specification and Software Design",
+        "bloom": "Apply"
     },
     "CO3": {
-        "description": "Apply graph algorithms",
-        "bloom": "Apply",
-        "topics": [
-            "Prim's algorithm",
-            "Kruskal's algorithm"
-            "Dijkstra's algorithm"
-            "Floyd-Warshall's algorithm"
-        ]
+        "description": "Justify design patterns, licensing terms, testing and DevOps strategies",
+        "bloom": "Apply"
+    },
+    "CO4": {
+        "description": "Apply software project management concepts in planning and estimation",
+        "bloom": "Apply"
+    },
+    "CO5": {
+        "description": "Utilize SQA practices, SPI techniques and modern software technologies",
+        "bloom": "Apply"
     }
 }
