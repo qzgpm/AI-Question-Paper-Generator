@@ -1,23 +1,48 @@
-# ===== Python =====
+# =====================
+# Python
+# =====================
 __pycache__/
-*.py[codz]
+*.py[cod]
 
-# ===== Virtual environments =====
-.venv/
-venv/
-env/
-.nix-shell/
+# =====================
+# Django
+# =====================
+db.sqlite3
+*.log
+local_settings.py
 
-# ===== Secrets =====
-apikey.txt
+# =====================
+# Secrets
+# =====================
+api.txt
 .env
 .env.*
 
-# ===== Test / cache =====
-.pytest_cache/
-.coverage
-.mypy_cache/
+# =====================
+# Virtual Environments
+# =====================
+venv/
+env/
+.venv/
 
-# ===== OS / editor =====
+# =====================
+# Nix
+# =====================
+.nix-shell/
+result
+shell.nix
+
+# =====================
+# OS / Editor
+# =====================
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+
+# =====================
+# Test / cache
+# =====================
+.pytest_cache/
+.mypy_cache/
+.coverage
