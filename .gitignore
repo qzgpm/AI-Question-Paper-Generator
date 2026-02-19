@@ -14,7 +14,7 @@ local_settings.py
 # =====================
 # Secrets
 # =====================
-api.txt
+*api.txt
 .env
 .env.*
 
