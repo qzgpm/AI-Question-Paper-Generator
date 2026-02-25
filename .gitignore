@@ -31,6 +31,8 @@ env/
 .nix-shell/
 result
 shell.nix
+flake.nix
+flake.lock
 
 # =====================
 # OS / Editor
