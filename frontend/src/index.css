@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+    --color-background: #ffffff;
+    --color-foreground: #000000;
+
+    --color-primary: #000000;
+    --color-primary-foreground: #ffffff;
+
+    --color-secondary: #f4f4f5;
+    --color-secondary-foreground: #18181b;
+
+    --color-muted: #f4f4f5;
+    --color-muted-foreground: #71717a;
+
+    --color-border: #e4e4e7;
+}
+
+@layer base {
+    body {
+        @apply bg-background text-foreground antialiased;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-primary text-primary-foreground hover:bg-black/90 inline-flex items-center justify-center rounded-md font-medium transition-colors px-4 py-2;
+    }
+
+    .btn-secondary {
+        @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex items-center justify-center rounded-md font-medium transition-colors px-4 py-2;
+    }
+
+    .card {
+        @apply bg-white border border-border rounded-lg shadow-sm;
+    }
+}
