@@ -1,103 +1,99 @@
 # KTU-QGen 🎓
 
-**KTU-QGen** is an AI-powered academic question paper generation system specifically designed for university internal examinations (Series Tests). It automates the creation of high-quality, balanced, and syllabus-aligned exam papers using LLMs.
+[![CI](https://github.com/qzgpm/AI-Question-Paper-Generator/actions/workflows/ci.yml/badge.svg)](https://github.com/qzgpm/AI-Question-Paper-Generator/actions)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+
+**KTU-QGen** is an AI-powered academic question paper generation system designed for university internal examinations. It automates the creation of high-quality, balanced, and syllabus-aligned exam papers using state-of-the-art LLMs.
 
 ---
 
-## 🚀 Key Features
+## ✨ Key Features
 
-- **AI-Powered Generation**: Instantly generate complete question papers from syllabus units using Llama 3 / Mistral via HuggingFace Inference API.
-- **Dual Generation Modes**:
-  - **Auto Mode**: Full paper generation in one click.
-  - **Manual Selection**: Teachers can pick from a candidate pool of AI-suggested questions.
-- **Diagram Support**: Native integration with **Mermaid.js** for generating and rendering technical diagrams (DFA, NFA, Flowcharts, etc.).
-- **Originality & Plagiarism**: 
-  - **AI Originality Check**: Estimates the likelihood of questions being copied from textbooks.
-  - **Internal Similarity Check**: Ensures no duplication by checking against the local Question Bank.
-- **Academic Dashboard**: Track generation history, curriculum progress, and faculty statistics.
-- **Auth System**: Role-based access control for Faculty, HODs, and Admins.
-- **Export Ready**: Clean, academic-style print layout with dynamic question numbering.
+- **🤖 AI-Powered Generation**: Instantly generate complete question papers from syllabus units using **Llama 3** or **Mistral** via HuggingFace.
+- **📊 Intuitive Dashboard**: Track curriculum progress, faculty statistics, and generation history in a clean, monochrome interface.
+- **📐 Technical Diagrams**: Native integration with **Mermaid.js** for rendering AI-generated technical diagrams (DFA, NFA, Flowcharts).
+- **🛡️ Quality Assurance**:
+    - **Originality Check**: AI-driven assessment of textbook copying risk.
+    - **Internal Similarity**: Local database checks to prevent duplication.
+- **🚀 Dual Modes**: Choose between **Auto-Generation** or **Manual Selection** from an AI-suggested candidate pool.
+- **📦 Export Ready**: Clean, academic-style layout optimized for printing and PDF export.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React (19), Vite, Tailwind CSS, Lucide React, Mermaid.js.
-- **Backend**: Django (5), Django REST Framework.
-- **Database**: SQLite (Default) / PostgreSQL.
+- **Frontend**: React 19, Vite, Tailwind CSS, Lucide icons.
+- **Backend**: Django 5 / 6, Django REST Framework, WhiteNoise.
 - **AI Engine**: HuggingFace Inference API (Meta-Llama-3-8B-Instruct).
+- **Database**: SQLite (Development) / PostgreSQL (Optional Production).
+- **DevOps**: GitHub Actions (CI), Docker, Docker Compose.
 
 ---
 
-## 🏁 Getting Started
+## 🏗️ Architecture
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- HuggingFace API Key
+```mermaid
+graph TD
+    User((Teacher/Admin)) -->|Interacts| React[React Frontend]
+    React -->|API Requests| Django[Django REST Backend]
+    Django -->|Prompts| HF[HuggingFace API]
+    HF -->|JSON Output| Django
+    Django -->|Store/Retrieve| DB[(SQLite/Postgres)]
+    Django -->|Render| Mermaid[Mermaid.js Diagrams]
+```
 
-### 1. Backend Setup (Django)
+---
+
+## 🚀 Getting Started
+
+### 🐳 Option 1: Docker (Recommended)
+The quickest way to get started is using Docker Compose.
 
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd ktu-qgen
+# Build and start the entire stack
+docker-compose up --build
+```
+The app will be available at `http://localhost:8000`.
 
-# Create and activate virtual environment
+### 💻 Option 2: Local Development
+
+#### 1. Backend Setup
+```bash
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Setup Environment Variables
-# Create a .env file in the root
-HUGGINGFACE_API_KEY=your_hf_key_here
-
-# Run migrations
 python manage.py migrate
-
-# Create superuser
-python manage.py createsuperuser
-
-# Start server
 python manage.py runserver
 ```
 
-### 2. Frontend Setup (React/Vite)
-
+#### 2. Frontend Setup
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
 ---
 
-## 📝 Configuration
-
-### Environment Variables (`.env`)
-| Variable | Description |
-|----------|-------------|
-| `HUGGINGFACE_API_KEY` | Required for AI generation and plagiarism checks. |
-| `DEBUG` | Set to `True` for development. |
-| `SECRET_KEY` | Django secret key. |
+## 🔧 Configuration
+Create a `.env` file in the root directory:
+```env
+HUGGINGFACE_API_KEY=your_hf_key_here
+SECRET_KEY=your_django_secret_key
+DEBUG=True
+```
 
 ---
 
-## 📐 Exam Structure (Default)
-The system is configured for the **50-Mark Series Test** format:
-- **Part A**: 5 Questions × 3 Marks = 15 Marks (Knowledge/Recall).
-- **Part B**: 5 Choice-Pairs (Attend either A or B) × 7 Marks = 35 Marks (Application/Analysis).
-- **Total**: 50 Marks.
-- **Time**: 1.5 - 2 Hours.
+## 🎡 CI/CD
+This project uses **GitHub Actions** for:
+- **Backend Verification**: Automated Django checks and unit tests.
+- **Frontend Validation**: Production build verification on Node.js 24.
+- **Automation**: Triggered on every push to `main` or `master`.
 
 ---
 
 ## 📜 License
-This project is developed for academic purposes.
+Developed for academic purposes under the MIT License.
