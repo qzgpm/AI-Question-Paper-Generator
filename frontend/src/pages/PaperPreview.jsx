@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import axios from 'axios'
 import MermaidDiagram from '../components/MermaidDiagram'
@@ -19,6 +19,8 @@ export default function PaperPreview() {
     const [loading, setLoading] = useState(true)
     const [checkingPlagiarism, setCheckingPlagiarism] = useState(false)
     const [originalityReport, setOriginalityReport] = useState(null)
+    const [exporting, setExporting] = useState(false)
+    const paperRef = useRef(null)
 
     useEffect(() => {
         const fetchPaper = async () => {
@@ -46,6 +48,8 @@ export default function PaperPreview() {
             setCheckingPlagiarism(false)
         }
     }
+
+
 
     if (loading) {
         return (
@@ -82,7 +86,10 @@ export default function PaperPreview() {
                         <Printer className="w-4 h-4" />
                         Print
                     </button>
-                    <button className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-800 transition-all flex items-center gap-2">
+                    <button
+                        onClick={() => window.print()}
+                        className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-800 transition-all flex items-center gap-2"
+                    >
                         <Download className="w-4 h-4" />
                         Export PDF
                     </button>
@@ -151,7 +158,7 @@ export default function PaperPreview() {
                     </div>
                 )}
 
-                <div className="max-w-[210mm] mx-auto bg-white shadow-2xl p-[20mm] min-h-[297mm] print:shadow-none print:max-w-none relative">
+                <div ref={paperRef} className="max-w-[210mm] mx-auto bg-white shadow-2xl p-[20mm] min-h-[297mm] print:shadow-none print:max-w-none relative paper-container">
                     {/* Header */}
                     <div className="text-center space-y-4 mb-20">
                         <div className="flex items-center justify-center gap-2 mb-6">

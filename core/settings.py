@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -109,7 +110,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [
+    BASE_DIR / "frontend/dist",
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Use WhiteNoise to serve compressed and cached static files
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 AUTH_USER_MODEL = "accounts.User"
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development
