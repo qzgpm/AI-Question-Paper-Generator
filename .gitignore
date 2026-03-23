@@ -27,4 +27,10 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-*.swo
+# Robot Framework
+output.xml
+log.html
+report.html
+selenium-screenshot-*.png
+geckodriver-*.log
+results/
