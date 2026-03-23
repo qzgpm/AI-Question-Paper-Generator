@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from apps.curriculum.models import Course, Module
 from apps.library.models import QuestionBank
@@ -69,10 +71,11 @@ def paper_detail(request, paper_id):
     )
 
 
-@csrf_exempt
 def api_generate_paper(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
 
     try:
         data = json.loads(request.body)
@@ -119,11 +122,11 @@ def api_generate_paper(request):
         part_a = ai_service.generate_part_a(
             course.name, units_payload, data.get("difficulty", "medium"), n=5
         )
-        print(f"DEBUG: Generated Part A count: {len(part_a)}")
+        logger.debug("Generated Part A count: %d", len(part_a))
         part_b = ai_service.generate_part_b(
             course.name, units_payload, data.get("difficulty", "medium"), n=5
         )
-        print(f"DEBUG: Generated Part B count: {len(part_b)}")
+        logger.debug("Generated Part B count: %d", len(part_b))
 
         # 4. Save to Database (Relational Mapping)
         _persist_to_library(paper, part_a, part_b, selected_modules)
@@ -149,14 +152,14 @@ def _persist_to_library(paper, part_a, part_b, modules_qs):
     existing_questions = list(QuestionBank.objects.filter(course=paper.course))
 
     # Process Part A
-    print(f"DEBUG: Processing Part A with {len(part_a)} entries")
+    logger.debug("Processing Part A with %d entries", len(part_a))
     for i, q in enumerate(part_a):
         try:
             unit_title = q.get("unit", "").lower()
             target_module = mod_map.get(unit_title)
             q_text = q.get("question") or q.get("text")
             if not q_text:
-                print(f"DEBUG: Skipping Part A {i} due to missing text: {q}")
+                logger.debug("Skipping Part A %d due to missing text: %s", i, q)
                 continue
 
             # Check for similarity
@@ -169,7 +172,7 @@ def _persist_to_library(paper, part_a, part_b, modules_qs):
             
             if duplicate_qb:
                 qb = duplicate_qb
-                print(f"DEBUG: Reusing existing QB {qb.id} for Part A {i}")
+                logger.debug("Reusing existing QB %d for Part A %d", qb.id, i)
             else:
                 qb = QuestionBank.objects.create(
                     course=paper.course,
@@ -184,11 +187,12 @@ def _persist_to_library(paper, part_a, part_b, modules_qs):
             ExamPaperQuestion.objects.create(
                 paper=paper, question=qb, part="A", order=i + 1
             )
-        except Exception:
+        except Exception as e:
+            logger.warning("Skipping Part A question %d due to error: %s", i, e)
             continue
 
     # Process Part B
-    print(f"DEBUG: Processing Part B with {len(part_b)} groups")
+    logger.debug("Processing Part B with %d groups", len(part_b))
     for i, group in enumerate(part_b):
         try:
             unit_title = group.get("unit", "").lower()
@@ -228,11 +232,11 @@ def _persist_to_library(paper, part_a, part_b, modules_qs):
                     order=i + 1,
                     slot="a" if choice == "question_a" else "b",
                 )
-        except Exception:
+        except Exception as e:
+            logger.warning("Skipping Part B group %d due to error: %s", i, e)
             continue
 
 
-@csrf_exempt
 def api_check_plagiarism(request, paper_id):
     """API view to check plagiarism for all questions in a paper."""
     if request.method != "POST":
@@ -283,11 +287,12 @@ def api_check_plagiarism(request, paper_id):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
-@csrf_exempt
 def api_generate_candidates(request):
     """Triggers AI to generate a pool of candidate questions."""
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
 
     try:
         data = json.loads(request.body)
@@ -415,11 +420,12 @@ def api_get_candidates(request):
     return JsonResponse({"questions": data})
 
 
-@csrf_exempt
 def api_manual_generate(request):
     """Creates a paper from user-selected question IDs."""
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
 
     try:
         data = json.loads(request.body)

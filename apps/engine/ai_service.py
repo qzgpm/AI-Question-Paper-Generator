@@ -6,6 +6,9 @@ from huggingface_hub import InferenceClient
 from django.conf import settings
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class HuggingFaceService:
@@ -24,7 +27,7 @@ class HuggingFaceService:
 
         for model_id in self.models:
             try:
-                print(f"DEBUG: Trying {model_id} via chat_completion...")
+                logger.debug("Trying %s via chat_completion...", model_id)
 
                 response = self.client.chat.completions.create(
                     model=model_id,
@@ -38,7 +41,7 @@ class HuggingFaceService:
                     return content
 
             except Exception as e:
-                print(f"DEBUG: {model_id} failed: {str(e)[:100]}")
+                logger.warning("%s failed: %s", model_id, str(e)[:100])
                 last_error = e
                 continue
 

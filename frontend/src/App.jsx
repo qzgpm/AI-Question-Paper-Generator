@@ -5,7 +5,7 @@ import {
   LayoutDashboard,
   BookOpen,
   FileText,
-  Settings,
+  Settings as SettingsIcon,
   LogOut,
   ChevronRight,
   Plus,
@@ -27,9 +27,10 @@ import PaperPreview from './pages/PaperPreview'
 import Questions from './pages/Questions'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Settings from './pages/Settings'
 
-// API Base URL
-axios.defaults.baseURL = 'http://localhost:8000'
+// API Base URL - handled by Vite proxy in development
+// axios.defaults.baseURL = 'http://localhost:8000'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -80,7 +81,7 @@ function AppContent() {
               <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" />
               <SidebarItem icon={BookOpen} label="Curriculum" to="/curriculum" />
               <SidebarItem icon={FileText} label="Question Bank" to="/questions" />
-              <SidebarItem icon={Settings} label="Settings" to="/settings" />
+              <SidebarItem icon={SettingsIcon} label="Settings" to="/settings" />
             </nav>
           </div>
 
@@ -114,6 +115,7 @@ function AppContent() {
           <Route path="/questions" element={<ProtectedRoute><Questions /></ProtectedRoute>} />
           <Route path="/generate" element={<ProtectedRoute><GeneratePaper /></ProtectedRoute>} />
           <Route path="/papers/:paperId" element={<ProtectedRoute><PaperPreview /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
           {/* Catch all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -13,7 +13,7 @@ HUGGINGFACE_API_KEY = getenv("HUGGINGFACE_API_KEY")
 SECRET_KEY = getenv("SECRET_KEY")
 DEBUG = getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]  # For development/docker ease. In production, specify actual domains.
 
 
 # Application definition
@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "corsheaders",
     "apps.accounts",
     "apps.curriculum",
     "apps.library",
@@ -36,7 +35,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -123,4 +121,15 @@ STORAGES = {
 }
 AUTH_USER_MODEL = "accounts.User"
 
-CORS_ALLOW_ALL_ORIGINS = True  # For development
+# Session and CSRF settings
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]

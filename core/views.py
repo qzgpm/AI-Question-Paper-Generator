@@ -18,14 +18,14 @@ def dashboard(request):
 
     # Recent papers
     recent_papers = []
-    for paper in ExamPaper.objects.all().order_by("-created_at")[:5]:
+    for paper in ExamPaper.objects.select_related('course').order_by("-created_at")[:5]:
         recent_papers.append(
             {
                 "id": paper.id,
                 "title": paper.title,
                 "course": paper.course.name if paper.course else "Unknown",
-                "date": paper.created_at.strftime("%Y-%m-%d %H:%M"),
-                "status": "Generated",
+                "date": paper.created_at.strftime("%b %d, %Y"),
+                "status": paper.status.capitalize() if paper.status else "Unknown",
             }
         )
 
@@ -40,10 +40,15 @@ def dashboard(request):
                 {"level": level, "name": name, "pct": int(pct), "count": count}
             )
 
+    # Bloom coverage: percentage of the 6 levels that have at least 1 question
+    covered_levels = sum(1 for b in blooms_distribution if b["count"] > 0)
+    bloom_coverage_pct = int((covered_levels / 6) * 100) if blooms_distribution else 0
+
     return JsonResponse(
         {
             "stats": stats,
             "recent_papers": recent_papers,
             "blooms_distribution": blooms_distribution,
+            "bloom_coverage_pct": bloom_coverage_pct,
         }
     )
