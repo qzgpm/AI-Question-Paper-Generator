@@ -1,8 +1,8 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count, Avg
+
+
 from .models import Course, Module, Department, Topic
 from apps.library.models import QuestionBank
 
@@ -58,7 +58,6 @@ def course_detail(request, course_id):
     )
 
 
-@csrf_exempt
 def add_course(request):
     """API view to add a new course."""
     if request.method == "POST":
@@ -81,7 +80,6 @@ def add_course(request):
     )
 
 
-@csrf_exempt
 def edit_course(request, course_id):
     """API view to edit an existing course."""
     course = get_object_or_404(Course, id=course_id)
@@ -102,7 +100,6 @@ def edit_course(request, course_id):
     )
 
 
-@csrf_exempt
 def delete_course(request, course_id):
     """API view to delete a course."""
     course = get_object_or_404(Course, id=course_id)
@@ -114,7 +111,6 @@ def delete_course(request, course_id):
     )
 
 
-@csrf_exempt
 def add_module(request, course_id):
     """API view to add a module and topics."""
     course = get_object_or_404(Course, id=course_id)
@@ -136,7 +132,6 @@ def add_module(request, course_id):
     )
 
 
-@csrf_exempt
 def edit_module(request, module_id):
     """API view to edit a module."""
     module = get_object_or_404(Module, id=module_id)
@@ -151,7 +146,6 @@ def edit_module(request, module_id):
     )
 
 
-@csrf_exempt
 def delete_module(request, module_id):
     """API view to delete a module."""
     module = get_object_or_404(Module, id=module_id)
@@ -163,7 +157,6 @@ def delete_module(request, module_id):
     )
 
 
-@csrf_exempt
 def edit_topic(request, topic_id):
     """API view to edit a topic."""
     topic = get_object_or_404(Topic, id=topic_id)
@@ -179,7 +172,6 @@ def edit_topic(request, topic_id):
     )
 
 
-@csrf_exempt
 def delete_topic(request, topic_id):
     """API view to delete a topic."""
     topic = get_object_or_404(Topic, id=topic_id)
@@ -207,7 +199,6 @@ def api_get_modules(request, course_id):
             {"id": mod.id, "title": mod.title, "number": mod.number, "topics": topics}
         )
     return JsonResponse({"course_name": course.name, "modules": module_data})
-@csrf_exempt
 def api_run_audit(request):
     """
     Simple curriculum audit API.

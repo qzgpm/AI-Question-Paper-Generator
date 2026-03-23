@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Set default axios base configuration
+axios.defaults.withCredentials = true;
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -8,9 +13,6 @@ export const useAuth = () => useContext(AuthContext);
 export default function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    // Set default axios base configuration
-    axios.defaults.withCredentials = true;
 
     const checkAuthStatus = async () => {
         try {
@@ -34,7 +36,6 @@ export default function AuthProvider({ children }) {
 
     const login = async (email, password) => {
         try {
-            // First get CSRF cookie
             await axios.get('/accounts/api/csrf/');
 
             const response = await axios.post('/accounts/api/login/', {
@@ -48,10 +49,10 @@ export default function AuthProvider({ children }) {
             }
             return { success: false, error: response.data.error };
         } catch (error) {
-            console.error("Login failed:", error);
+            console.error('Login error:', error.response?.data || error.message);
             return {
                 success: false,
-                error: error.response?.data?.error || "Login failed. Please try again."
+                error: error.response?.data?.error || 'Login failed. Please try again.'
             };
         }
     };

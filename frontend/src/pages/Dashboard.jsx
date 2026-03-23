@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
     BookOpen,
     FileText,
     Plus,
     ChevronRight,
-    MoreVertical
+    GraduationCap,
+    ClipboardList
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard() {
+    const { user } = useAuth()
+    const navigate = useNavigate()
     const [data, setData] = useState({
         stats: { courses: 0, modules: 0, papers: 0, questions: 0 },
         recent_papers: [],
-        blooms_distribution: []
+        blooms_distribution: [],
+        bloom_coverage_pct: 0
     })
     const [loading, setLoading] = useState(true)
+    const [auditResult, setAuditResult] = useState(null)
+    const [auditing, setAuditing] = useState(false)
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -31,6 +38,19 @@ export default function Dashboard() {
         fetchDashboard()
     }, [])
 
+    const handleAudit = async () => {
+        setAuditing(true)
+        setAuditResult(null)
+        try {
+            const response = await axios.post('/curriculum/api/audit/')
+            setAuditResult({ type: 'success', message: response.data.message })
+        } catch {
+            setAuditResult({ type: 'error', message: 'Audit failed. Please try again.' })
+        } finally {
+            setAuditing(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex-1 flex items-center justify-center bg-[#fafafa]">
@@ -42,7 +62,8 @@ export default function Dashboard() {
         )
     }
 
-    const { stats, recent_papers, blooms_distribution } = data
+    const { stats, recent_papers, blooms_distribution, bloom_coverage_pct } = data
+    const firstName = user?.name?.split(' ')[0] || 'there'
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -60,25 +81,25 @@ export default function Dashboard() {
 
             <div className="flex-1 overflow-auto p-10">
                 <div className="max-w-6xl mx-auto space-y-10">
-                    <div className="flex justify-between items-end">
-                        <div>
-                            <h2 className="text-3xl font-bold tracking-tight">Welcome back</h2>
-                            <p className="text-muted-foreground">Here's what's happening with your curriculum.</p>
-                        </div>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight">{firstName}</h2>
+                        <p className="text-muted-foreground mt-1">Data</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatCard label="Courses" value={stats.courses} icon={BookOpen} />
-                        <StatCard label="Modules" value={stats.modules} icon={FileText} />
-                        <StatCard label="Total Papers" value={stats.papers} icon={FileText} />
-                        <StatCard label="Questions" value={stats.questions} icon={FileText} />
+                        <StatCard label="Courses" value={stats.courses} icon={BookOpen} to="/curriculum" />
+                        <StatCard label="Modules" value={stats.modules} icon={ClipboardList} />
+                        <StatCard label="Total Papers" value={stats.papers} icon={FileText} to="/generate" />
+                        <StatCard label="Questions" value={stats.questions} icon={GraduationCap} to="/questions" />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-bold tracking-tight">Recent Exam Papers</h3>
-                                <button className="text-xs font-medium text-muted-foreground hover:text-foreground">View All</button>
+                                <Link to="/generate" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+                                    View All →
+                                </Link>
                             </div>
                             <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
                                 <table className="w-full text-sm text-left">
@@ -93,12 +114,20 @@ export default function Dashboard() {
                                     <tbody className="divide-y divide-border">
                                         {recent_papers.length > 0 ? (
                                             recent_papers.map((paper) => (
-                                                <tr key={paper.id} className="group hover:bg-secondary/30 transition-colors cursor-pointer">
-                                                    <td className="px-6 py-4 font-semibold">{paper.title}</td>
+                                                <tr
+                                                    key={paper.id}
+                                                    onClick={() => navigate(`/papers/${paper.id}`)}
+                                                    className="group hover:bg-secondary/30 transition-colors cursor-pointer"
+                                                >
+                                                    <td className="px-6 py-4 font-semibold group-hover:text-black">{paper.title}</td>
                                                     <td className="px-6 py-4 text-muted-foreground">{paper.course}</td>
                                                     <td className="px-6 py-4 text-muted-foreground">{paper.date}</td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${paper.status === 'Generated' ? 'bg-zinc-100 text-zinc-900 border border-zinc-200' : 'bg-white text-zinc-500 border border-zinc-200'
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${paper.status === 'Completed'
+                                                            ? 'bg-zinc-100 text-zinc-900 border border-zinc-200'
+                                                            : paper.status === 'Failed'
+                                                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                                                : 'bg-amber-50 text-amber-700 border border-amber-200'
                                                             }`}>
                                                             {paper.status}
                                                         </span>
@@ -107,7 +136,12 @@ export default function Dashboard() {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="4" className="px-6 py-8 text-center text-muted-foreground">No recent papers created yet.</td>
+                                                <td colSpan="4" className="px-6 py-12 text-center">
+                                                    <p className="text-muted-foreground text-sm">No papers yet.</p>
+                                                    <Link to="/generate" className="text-xs font-bold mt-2 inline-block hover:underline">
+                                                        Generate your first paper →
+                                                    </Link>
+                                                </td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -121,24 +155,28 @@ export default function Dashboard() {
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-xs font-bold uppercase tracking-tighter">
                                         <span>Bloom Mapping</span>
-                                        <span className="text-muted-foreground">Overall Coverage</span>
+                                        <span className="text-muted-foreground">{bloom_coverage_pct}% Coverage</span>
                                     </div>
                                     <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                                        <div className="h-full bg-black w-[88%] rounded-full" />
+                                        <div
+                                            className="h-full bg-black rounded-full transition-all duration-500"
+                                            style={{ width: `${bloom_coverage_pct}%` }}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 pt-4">
+                                <div className="grid grid-cols-2 gap-3 pt-2">
                                     {blooms_distribution.slice(0, 4).length > 0 ? (
                                         blooms_distribution.slice(0, 4).map((bloom, i) => (
-                                            <div key={i} className="p-4 bg-[#fcfcfc] border border-border rounded-lg text-center">
+                                            <div key={i} className="p-3 bg-[#fcfcfc] border border-border rounded-lg text-center">
                                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 truncate">{bloom.name}</p>
                                                 <p className="text-xl font-bold">{bloom.pct}%</p>
+                                                <p className="text-[10px] text-muted-foreground">{bloom.count} qs</p>
                                             </div>
                                         ))
                                     ) : (
                                         [1, 2, 3, 4].map((i) => (
-                                            <div key={i} className="p-4 bg-[#fcfcfc] border border-border rounded-lg text-center opacity-50">
+                                            <div key={i} className="p-3 bg-[#fcfcfc] border border-border rounded-lg text-center opacity-40">
                                                 <div className="w-8 h-2 bg-zinc-200 mx-auto rounded mb-2"></div>
                                                 <div className="w-12 h-4 bg-zinc-100 mx-auto rounded"></div>
                                             </div>
@@ -146,26 +184,21 @@ export default function Dashboard() {
                                     )}
                                 </div>
 
+                                {auditResult && (
+                                    <div className={`text-xs px-3 py-2 rounded-lg border ${auditResult.type === 'success'
+                                        ? 'bg-green-50 border-green-200 text-green-700'
+                                        : 'bg-red-50 border-red-200 text-red-700'
+                                        }`}>
+                                        {auditResult.message}
+                                    </div>
+                                )}
+
                                 <button
-                                    onClick={async () => {
-                                        try {
-                                            const btn = document.getElementById('audit-btn');
-                                            btn.innerText = 'Auditing...';
-                                            btn.disabled = true;
-                                            const response = await axios.post('/curriculum/api/audit/');
-                                            alert(response.data.message);
-                                            btn.innerText = 'Run Audit';
-                                            btn.disabled = false;
-                                        } catch (e) {
-                                            alert("Audit failed.");
-                                            document.getElementById('audit-btn').innerText = 'Run Audit';
-                                            document.getElementById('audit-btn').disabled = false;
-                                        }
-                                    }}
-                                    id="audit-btn"
-                                    className="w-full bg-secondary py-2 rounded-lg text-xs font-bold hover:bg-zinc-200 transition-colors uppercase tracking-widest disabled:opacity-50"
+                                    onClick={handleAudit}
+                                    disabled={auditing}
+                                    className="w-full bg-secondary py-2 rounded-lg text-xs font-bold hover:bg-zinc-200 transition-colors uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Run Audit
+                                    {auditing ? 'Auditing...' : 'Run Audit'}
                                 </button>
                             </div>
                         </div>
@@ -176,14 +209,13 @@ export default function Dashboard() {
     )
 }
 
-function StatCard({ label, value, icon: Icon }) {
-    return (
+function StatCard({ label, value, icon: Icon, to }) {
+    const content = (
         <div className="p-6 bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-default">
             <div className="flex items-center justify-between mb-4">
                 <div className="p-2 bg-secondary rounded-lg group-hover:bg-black group-hover:text-white transition-colors">
                     <Icon className="w-4 h-4" />
                 </div>
-                <MoreVertical className="w-4 h-4 text-muted-foreground cursor-pointer" />
             </div>
             <div>
                 <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
@@ -191,4 +223,5 @@ function StatCard({ label, value, icon: Icon }) {
             </div>
         </div>
     )
+    return to ? <Link to={to} className="block">{content}</Link> : content
 }

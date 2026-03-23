@@ -1,5 +1,4 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from .models import QuestionBank
 
 def api_question_list(request):
@@ -20,7 +19,6 @@ def api_question_list(request):
         })
     return JsonResponse({"questions": data})
 
-@csrf_exempt
 def api_delete_question(request, question_id):
     """API view to delete a question."""
     if request.method == "POST":
