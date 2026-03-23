@@ -61,3 +61,62 @@ jobs:
 
     - name: Build Frontend
       run: cd frontend && npm run build
+
+  integration-test-robot:
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        cd frontend && npm ci
+
+    - name: Start Django Server
+      run: |
+        python manage.py migrate
+        python manage.py runserver 8000 &
+      env:
+        SECRET_KEY: "ci-secret-key"
+        DEBUG: "True"
+        HUGGINGFACE_API_KEY: "dummy-key"
+
+    - name: Start Frontend Server
+      run: |
+        cd frontend && npm run dev -- --port 5173 &
+      env:
+        VITE_API_URL: http://localhost:8000
+
+    - name: Wait for Servers
+      run: |
+        npx wait-on http://localhost:8000/accounts/api/csrf/ http://localhost:5173/login --timeout 60000
+
+    - name: Run Robot Tests
+      run: |
+        # Run API tests first
+        robot --variable BASE_URL:http://localhost:8000 tests/robot/api/
+        # Run Web tests
+        robot --variable URL:http://localhost:5173/login --variable BROWSER:headlesschrome tests/robot/web/
+
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: robot-test-reports
+        path: |
+          report.html
+          log.html
+          output.xml
+
