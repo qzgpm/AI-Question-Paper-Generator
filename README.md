@@ -77,7 +77,36 @@ npm run dev
 
 ---
 
+## 🧪 Testing with Robot Framework
+We use **Robot Framework** for E2E and API testing.
+
+### 1. Prerequisites
+Ensure you have the virtual environment activated:
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Running API Tests
+Run the API tests while the Django backend is running:
+```bash
+robot tests/robot/api/
+```
+
+### 3. Running Web UI Tests (E2E)
+Run the Web UI tests while both the Django and Vite servers are running:
+```bash
+robot tests/robot/web/
+```
+Note: You can specify the browser using the `--variable BROWSER:chrome` flag if needed (default is `headlesschrome`).
+
+### 4. Viewing Results
+Test reports (`report.html`, `log.html`) will be generated in the root directory.
+
+---
+
 ## 🔧 Configuration
+
 Create a `.env` file in the root directory:
 ```env
 HUGGINGFACE_API_KEY=your_hf_key_here
